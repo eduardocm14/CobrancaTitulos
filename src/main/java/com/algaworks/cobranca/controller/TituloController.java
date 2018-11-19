@@ -17,36 +17,33 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.algaworks.cobranca.model.StatusTitulo;
 import com.algaworks.cobranca.model.Titulo;
-import com.algaworks.cobranca.repository.Titulos;
+import com.algaworks.cobranca.repository.TituloFilter;
 import com.algaworks.cobranca.service.CadastroTituloService;
 
 @Controller
 @RequestMapping("/titulos")
 public class TituloController {
-	
+
 	private static final String CADASTRO_VIEW = "CadastroTitulo";
-	
-	@Autowired
-	private Titulos titulos;
-	
+
 	@Autowired
 	private CadastroTituloService cadastroTituloService;
 
 	@RequestMapping("/novo")
-	public ModelAndView novo() {
+	public ModelAndView Novo() {
 		ModelAndView mv = new ModelAndView(CADASTRO_VIEW);
 		mv.addObject(new Titulo());
 		return mv;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST)
-	public String salvar(@Validated Titulo titulo, Errors errors, RedirectAttributes attributes) {
+	public String Salvar(@Validated Titulo titulo, Errors errors, RedirectAttributes attributes) {
 		if (errors.hasErrors()) {
 			return CADASTRO_VIEW;
 		}
-		
+
 		try {
-			cadastroTituloService.salvar(titulo);
+			cadastroTituloService.Salvar(titulo);
 			attributes.addFlashAttribute("mensagem", "Título salvo com sucesso!");
 			return "redirect:/titulos/novo";
 		} catch (IllegalArgumentException e) {
@@ -54,38 +51,41 @@ public class TituloController {
 			return CADASTRO_VIEW;
 		}
 	}
-	
+
 	@RequestMapping
-	public ModelAndView pesquisar() {
-		List<Titulo> todosTitulos = titulos.findAll();
+	public ModelAndView Pesquisar(@ModelAttribute("filtro") TituloFilter filtro) {
+
+		List<Titulo> TodosTitulos = cadastroTituloService.pesquisaTitulos(filtro);
+
 		ModelAndView mv = new ModelAndView("PesquisaTitulos");
-		mv.addObject("titulos", todosTitulos);
+
+		mv.addObject("titulos", TodosTitulos);
 		return mv;
 	}
-	
+
 	@RequestMapping("{codigo}")
-	public ModelAndView edicao(@PathVariable("codigo") Titulo titulo) {
-		ModelAndView mv = new ModelAndView(CADASTRO_VIEW); 
+	public ModelAndView Edicao(@PathVariable("codigo") Titulo titulo) {
+		ModelAndView mv = new ModelAndView(CADASTRO_VIEW);
 		mv.addObject(titulo);
 		return mv;
 	}
-	
-	@RequestMapping(value="{codigo}", method = RequestMethod.DELETE)
-	public String excluir(@PathVariable Long codigo, RedirectAttributes attributes) {
-		cadastroTituloService.excluir(codigo);
-		
+
+	@RequestMapping(value = "{codigo}", method = RequestMethod.DELETE)
+	public String Excluir(@PathVariable Long codigo, RedirectAttributes attributes) {
+		cadastroTituloService.Excluir(codigo);
+
 		attributes.addFlashAttribute("mensagem", "Título excluído com sucesso!");
 		return "redirect:/titulos";
 	}
-	
+
 	@RequestMapping(value = "/{codigo}/receber", method = RequestMethod.PUT)
-	public @ResponseBody String receber(@PathVariable Long codigo) {
-		return cadastroTituloService.receber(codigo);
+	public @ResponseBody String Receber(@PathVariable Long codigo) {
+		return cadastroTituloService.Receber(codigo);
 	}
-	
+
 	@ModelAttribute("todosStatusTitulo")
-	public List<StatusTitulo> todosStatusTitulo() {
+	public List<StatusTitulo> TodosStatusTitulo() {
 		return Arrays.asList(StatusTitulo.values());
 	}
-	
+
 }
